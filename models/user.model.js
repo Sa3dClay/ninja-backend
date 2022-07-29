@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcrypt = require("bcrypt");
+const { validateSignUp } = require("../validators/auth.validator");
 
 const userSchema = new Schema(
     {
@@ -19,7 +20,9 @@ const userSchema = new Schema(
     }
 );
 
-userSchema.statics.signup = async function(email, password) {
+userSchema.statics.signup = async function (email, password) {
+    validateSignUp(email, password);
+
     const exists = await this.findOne({ email });
 
     if (exists) throw Error("Email already exists");
