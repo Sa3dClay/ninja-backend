@@ -1,8 +1,18 @@
-const userModel = require("../models/user.model");
+const User = require("../models/user.model");
+const { createToken } = require("./token.controller");
 
 // login
 const login = async (req, res) => {
-    res.json({ msg: "login user" });
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.login(email, password);
+        const token = createToken(user._id);
+
+        res.status(200).json({ user, token });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 };
 
 // signup
@@ -10,9 +20,10 @@ const signup = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await userModel.signup(email, password);
+        const user = await User.signup(email, password);
+        const token = createToken(user._id);
 
-        res.status(200).json({ user });
+        res.status(200).json({ user, token });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

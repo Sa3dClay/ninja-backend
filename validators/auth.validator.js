@@ -1,14 +1,21 @@
 const validator = require("validator");
 
-const validateSignUp = (email, password) => {
-    if (!email) throw Error("Email field is required");
+const checkRequiredField = (field, fieldName) => {
+    if (!field) throw Error(fieldName + " is required");
+};
 
-    if (!password) throw Error("Password field is required");
+const validateSignUp = (email, password) => {
+    checkRequiredField(email, "Email");
+    checkRequiredField(password, "Password");
 
     if (!validator.isEmail(email)) throw Error("Email is not valid");
 
-    if (!validator.isStrongPassword(password))
-        throw Error("Password is not strong enough");
+    if (!validator.isStrongPassword(password)) throw Error("Password is not strong enough");
 };
 
-module.exports = { validateSignUp };
+const validateLogin = (email, password) => {
+    checkRequiredField(email, "Email");
+    checkRequiredField(password, "Password");
+};
+
+module.exports = { validateSignUp, validateLogin };
