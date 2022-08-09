@@ -4,7 +4,7 @@ const workoutModel = require("../models/workout.model");
 // get all workouts
 const getWorkouts = async (req, res) => {
     // get all workouts and sort desc
-    const workouts = await workoutModel.find({}).sort({ createdAt: -1 });
+    const workouts = await workoutModel.find({ user_id: req.user._id }).sort({ createdAt: -1 });
 
     // return workouts
     res.status(200).json(workouts);
@@ -48,7 +48,9 @@ const createWorkout = async (req, res) => {
 
     // try to add new workout
     try {
-        const workout = await workoutModel.create({ title, reps, load });
+        const user_id = req.user._id;
+        const workout = await workoutModel.create({ title, reps, load, user_id });
+
         res.status(200).json(workout);
     } catch (e) {
         res.status(400).json({ error: e.message });
@@ -65,10 +67,7 @@ const updateWorkout = async (req, res) => {
         return res.status(404).json({ error: "No such workout" });
 
     // find and delete workout with id
-    const workout = await workoutModel.findOneAndUpdate(
-        { _id: id },
-        { ...req.body }
-    );
+    const workout = await workoutModel.findOneAndUpdate({ _id: id }, { ...req.body });
 
     // return not found if no workout
     if (!workout) return res.status(404).json({ error: "No such workout" });
@@ -84,19 +83,20 @@ const updateWorkout = async (req, res) => {
 const deleteWorkout = async (req, res) => {
     // get id from req url
     const { id } = req.params;
+    const user_id = req.user._id;
 
     // check if id is valid
     if (!mongoose.Types.ObjectId.isValid(id))
         return res.status(404).json({ error: "No such workout" });
 
     // find and delete workout with id
-    const workout = await workoutModel.findOneAndDelete({ _id: id });
+    const workout = await workoutModel.findOneAndDelete({ _id: id, user_id });
 
     // return not found if no workout
     if (!workout) return res.status(404).json({ error: "No such workout" });
 
     // get all workouts after delete
-    const workouts = await workoutModel.find({}).sort({ createdAt: -1 });
+    const workouts = await workoutModel.find({ user_id }).sort({ createdAt: -1 });
 
     // return deleted workout
     res.status(200).json(workouts);
